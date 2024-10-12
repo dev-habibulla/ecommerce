@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
-import { admin_login } from "../../store/reducers/authReducer";
-
+import { admin_login, clearMessage } from "../../store/reducers/authReducer";
+import {ClipLoader} from "react-spinners";
+import toast from 'react-hot-toast';
 
 
 const AdminLogin = () => {
 
   let dispatch=useDispatch()
+  let {loader,errorMessage,successMessage}=useSelector(state=>state.auth)
 
   let [data, setData] = useState({
     email: "",
@@ -26,6 +28,24 @@ const AdminLogin = () => {
     console.log(data);
     dispatch(admin_login(data))
   };
+
+  useEffect(() => {
+   
+    if(errorMessage){
+      toast.error(errorMessage)
+      dispatch(clearMessage)
+    }
+
+  }, [errorMessage])
+  
+  useEffect(() => {
+   
+    if(successMessage){
+      toast.success(successMessage)
+      dispatch(clearMessage)
+    }
+
+  }, [successMessage])
 
   return (
     <div className=" min-w-screen min-h-screen	bg-mainColor flex justify-center items-center">
@@ -66,8 +86,10 @@ const AdminLogin = () => {
               />
             </div>
 
-            <button className=" bg-mainColor w-full hover:bg-mainHover text-white mb-3 px-7 py-2 rounded-md">
-              Login
+            <button disabled={loader ? true :false} className=" disabled:bg-slate-400 bg-mainColor w-full hover:bg-mainHover text-white mb-3 px-7 py-2 rounded-md">
+              
+              {loader ? <ClipLoader size={25} color="#fff" />:"Login"}
+             
             </button>
           </form>
         </div>
@@ -75,5 +97,6 @@ const AdminLogin = () => {
     </div>
   );
 };
+
 
 export default AdminLogin;

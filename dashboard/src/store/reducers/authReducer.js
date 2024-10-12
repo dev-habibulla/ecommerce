@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 export let admin_login = createAsyncThunk(
   "auth/admin_login",
-  async (adminInfo) => {
+  async (adminInfo, { rejectWithValue, fulfillWithValue }) => {
     console.log("admin info reducer", adminInfo);
 
     try {
@@ -12,9 +12,12 @@ export let admin_login = createAsyncThunk(
         withCredentials: true,
       });
 
-      console.log(data);
+      return fulfillWithValue(data);
+
     } catch (error) {
-      console.log("error");
+
+      return rejectWithValue(error.response.data);
+      
     }
   }
 );
@@ -27,7 +30,31 @@ export const authReducer = createSlice({
     loader: false,
     userInfo: "",
   },
-  reducers: {},
+  reducers: {
+    clearMessage: (state, action) => {
+      state.errorMessage = "";
+      state.successMessage =""
+    },
+  },
+
+  extraReducers: (builder) => {
+    builder
+      .addCase(admin_login.pending, (state, { payload }) => {
+        state.loader = true;
+      })
+      .addCase(admin_login.rejected, (state, { payload }) => {
+        state.loader = false;
+        state.errorMessage = payload.error
+      })
+      .addCase(admin_login.fulfilled, (state, { payload }) => {
+        state.loader = false;
+        state.successMessage = payload.message
+       
+      })
+      
+  },
 });
+
+export const { clearMessage } = authReducer.actions;
 
 export default authReducer.reducer;
